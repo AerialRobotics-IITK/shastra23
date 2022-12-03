@@ -57,11 +57,14 @@
   <exec_depend>roscpp</exec_depend>
   <buildtool_depend>catkin</buildtool_depend>
   <buildtool_depend>catkin_simple</buildtool_depend>
-
+  <exec_depend>gazebo_ros</exec_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->
-
+    <gazebo_ros 
+      gazebo_plugin_path="${prefix}/../../build/lib">
+    </gazebo_ros>
   </export>
+
 </package>
