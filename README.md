@@ -7,6 +7,7 @@ Check out planning [here](https://docs.google.com/spreadsheets/d/19zKDOTPgZpVa8U
 
 ## Installation
 
+Note that the following are compatible with `ros-noetic`. For `ros-melodic` or before, you'll have to take care about branches in git submodules.  
 Add this in your .bashrc
 
 ```bash

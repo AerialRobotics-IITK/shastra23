@@ -1,6 +1,8 @@
 [submodule "catkin_simple"]
 	path = catkin_simple
 	url = https://github.com/catkin/catkin_simple
+	branch = master
 [submodule "ar_track_alvar"]
 	path = ar_track_alvar
 	url = https://github.com/machinekoder/ar_track_alvar.git
+	branch = noetic-devel
