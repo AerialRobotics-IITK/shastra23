@@ -27,11 +27,21 @@ git submodule init
 git submodule update
 ```
 
-- Follow the installation steps [here], to setup RotorS fork in a seperate workspace.
+- Follow the installation steps [here], to setup RotorS-ARIITK fork in a seperate workspace.
 
 > NOTE: If you have `rotorS` package of our fork, [RotorS_ARIITK](https://github.com/AerialRobotics-IITK/rotors_simulator) in another workspace, then you don't need to follow along with the steps below.
 
 - Keeping the above `rotorS` sourced, check via `echo $ROS_PACKAGE_PATH | tr ':' '\n'`, build this package now. This will make sure that every time you source this workspace, `rotorS` gets sourced as well.
+
+### Running
+
+Source `shastra_ws`, and run the `main.launch` file.
+
+```bash
+roslaunch shastra_gazebo shastra_main.launch
+```
+
+The UAV should stabilise at (0.0, 0.0, 5.0).
 
 ---
 

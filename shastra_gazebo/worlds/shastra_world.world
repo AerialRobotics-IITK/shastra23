@@ -135,8 +135,7 @@
       </link>
       <pose>0 0 0 0 -0 0</pose>
     </model>
-    <model name='cardboard_box'>
-      <pose>4.93666 1.54833 0.15 0 -0 0</pose>
+    <model name='aruco_13_box'>
       <link name='link'>
         <inertial>
           <mass>2</mass>
@@ -148,12 +147,12 @@
             <iyz>0</iyz>
             <izz>0.0683333</izz>
           </inertia>
-          <pose>0 0 0 0 -0 0</pose>
+          <pose>0 0 0 0 0 0</pose>
         </inertial>
         <collision name='collision'>
           <geometry>
             <box>
-              <size>0.5 0.4 0.3</size>
+              <size>0.25 0.25 0.25</size>
             </box>
           </geometry>
           <surface>
@@ -179,11 +178,11 @@
           <max_contacts>10</max_contacts>
         </collision>
         <visual name='visual'>
-          <pose>0 0 -0.15 0 -0 0</pose>
+          <pose>0 0 0 0 0 0</pose>
           <geometry>
             <mesh>
-              <uri>model://cardboard_box/meshes/cardboard_box.dae</uri>
-              <scale>1.25932 1.00745 0.755591</scale>
+              <uri>model://aruco/aruco_box_13.dae</uri>
+              <scale>3.2808 3.2808 3.2808</scale>
             </mesh>
           </geometry>
         </visual>
@@ -192,8 +191,7 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <model name='cardboard_box_0'>
-      <pose>4.40007 -1.04233 0.15 0 -0 0</pose>
+    <model name='cardboard_box'>
       <link name='link'>
         <inertial>
           <mass>2</mass>
@@ -205,12 +203,12 @@
             <iyz>0</iyz>
             <izz>0.0683333</izz>
           </inertia>
-          <pose>0 0 0 0 -0 0</pose>
+          <pose>0 0 0 0 0 0</pose>
         </inertial>
         <collision name='collision'>
           <geometry>
             <box>
-              <size>0.5 0.4 0.3</size>
+              <size>0.25 0.25 0.25</size>
             </box>
           </geometry>
           <surface>
@@ -236,11 +234,11 @@
           <max_contacts>10</max_contacts>
         </collision>
         <visual name='visual'>
-          <pose>0 0 -0.15 0 -0 0</pose>
+          <pose>0 0 -0.125 0 0 0</pose>
           <geometry>
             <mesh>
               <uri>model://cardboard_box/meshes/cardboard_box.dae</uri>
-              <scale>1.25932 1.00745 0.755591</scale>
+              <scale>0.6 0.6 0.6</scale>
             </mesh>
           </geometry>
         </visual>
@@ -250,7 +248,6 @@
       </link>
     </model>
     <model name='unit_box'>
-      <pose>-2.5278 2.47605 0.5 0 -0 0</pose>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -262,12 +259,12 @@
             <iyz>0</iyz>
             <izz>0.166667</izz>
           </inertia>
-          <pose>0 0 0 0 -0 0</pose>
+          <pose>0 0 0 0 0 0</pose>
         </inertial>
         <collision name='collision'>
           <geometry>
             <box>
-              <size>1 1 0.999993</size>
+              <size>1 1 1</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -287,12 +284,12 @@
         <visual name='visual'>
           <geometry>
             <box>
-              <size>1 1 0.999993</size>
+              <size>1 1 1</size>
             </box>
           </geometry>
           <material>
             <script>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/Yellow</name>
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
           </material>
@@ -303,7 +300,6 @@
       </link>
     </model>
     <model name='unit_cylinder'>
-      <pose>-5 4 0.5 0 -0 0</pose>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -321,7 +317,7 @@
           <geometry>
             <cylinder>
               <radius>0.5</radius>
-              <length>0.999997</length>
+              <length>1</length>
             </cylinder>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -347,7 +343,7 @@
           </geometry>
           <material>
             <script>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/Green</name>
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
           </material>
@@ -372,8 +368,8 @@
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
-      <model name='cardboard_box'>
-        <pose>-1.1943 -5.43093 0.199 0 -0 0</pose>
+      <model name='aruco_13_box'>
+        <pose>-2 -5 0.2 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='link'>
           <pose>-1.1943 -5.43093 0.199 0 -0 0</pose>
@@ -382,8 +378,8 @@
           <wrench>-0 -0 -0 0 -0 0</wrench>
         </link>
       </model>
-      <model name='cardboard_box_0'>
-        <pose>4.40007 -1.04233 0.199 0 -0 0</pose>
+      <model name='cardboard_box'>
+        <pose>3 -2 0.2 0.2 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='link'>
           <pose>4.40007 -1.04233 0.199 0 -0 0</pose>
@@ -403,20 +399,20 @@
         </link>
       </model>
       <model name='unit_box'>
-        <pose>-4 4 0.020763 0 0 -1.3e-05</pose>
-        <scale>2 2 0.041526</scale>
+        <pose>-4 4 0.08 0 0 0</pose>
+        <scale>2 2 0.15</scale>
         <link name='link'>
-          <pose>-4 4 0.020763 0 0 -1.3e-05</pose>
+          <pose>-4 4 0.08 0 0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='unit_cylinder'>
-        <pose>4 6 0.028687 0 0 -0.00013</pose>
-        <scale>2 2 0.057373</scale>
+        <pose>4 6 0.05 0 0 0</pose>
+        <scale>2 2 0.05</scale>
         <link name='link'>
-          <pose>4 6 0.028687 0 0 -0.00013</pose>
+          <pose>4 6 0.05 0 0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 -0 0 0 -0 0</acceleration>
           <wrench>0 -0 0 0 -0 0</wrench>
