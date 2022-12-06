@@ -23,12 +23,12 @@ source /usr/share/gazebo/setup.sh # put in .bashrc
 mkdir -p shastra_ws/src && cd shastra_ws/
 catkin init
 cd src/
-git clone https://github.com/AerialRobotics-IITK/rotors_simulator .
+git clone https://github.com/AerialRobotics-IITK/shastra23 .
 git submodule init
 git submodule update
 ```
 
-- Follow the installation steps [here], to setup RotorS-ARIITK fork in a seperate workspace.
+- Follow the installation steps [here](https://github.com/AerialRobotics-IITK/rotors_simulator), to setup RotorS-ARIITK fork in a seperate workspace.
 
 > NOTE: If you have `rotorS` package of our fork, [RotorS_ARIITK](https://github.com/AerialRobotics-IITK/rotors_simulator) in another workspace, then you don't need to follow along with the steps below.
 
