@@ -23,7 +23,7 @@ source /usr/share/gazebo/setup.sh # put in .bashrc
 mkdir -p shastra_ws/src && cd shastra_ws/
 catkin init
 cd src/
-git clone https://github.com/AerialRobotics-IITK/shastra23 .
+git clone git@github.com:AerialRobotics-IITK/shastra23.git .
 git submodule init
 git submodule update
 ```
