@@ -49,8 +49,11 @@ namespace
             };
         };
 
+        // transition actions
         void takeoff(cmdTakeoff const &);
         void landing(cmdLanding const &);
+
+        typedef Rest initial_state;
 
         // Transition Table
         struct transition_table : mpl::vector2<
