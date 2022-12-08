@@ -103,6 +103,11 @@ target_link_libraries(example_planner
   ${Boost_LIBRARIES}
 )
 
+add_executable(planner src/planner.cpp include/shastra_planner/planner.hpp)
+target_link_libraries(example_planner
+  ${Boost_LIBRARIES}
+)
+
 # # Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
 # ${catkin_LIBRARIES}
