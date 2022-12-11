@@ -6,3 +6,6 @@
 	path = ar_track_alvar
 	url = https://github.com/machinekoder/ar_track_alvar.git
 	branch = noetic-devel
+[submodule "mav_control_rw"]
+	path = mav_control_rw
+	url = git@github.com:AerialRobotics-IITK/mav_control_rw.git
