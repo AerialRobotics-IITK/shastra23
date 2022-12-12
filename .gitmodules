@@ -6,12 +6,9 @@
 	path = ar_track_alvar
 	url = https://github.com/machinekoder/ar_track_alvar.git
 	branch = noetic-devel
-<<<<<<< HEAD
 [submodule "rovio"]
 	path = rovio
 	url = git@github.com:AerialRobotics-IITK/rovio.git
-=======
 [submodule "mav_control_rw"]
 	path = mav_control_rw
 	url = git@github.com:AerialRobotics-IITK/mav_control_rw.git
->>>>>>> 65e261efed6f06e3d563b0189c34542af0cb5d70
