@@ -9,3 +9,4 @@
 [submodule "mav_control_rw"]
 	path = mav_control_rw
 	url = git@github.com:AerialRobotics-IITK/mav_control_rw.git
+	branch = base_2022
