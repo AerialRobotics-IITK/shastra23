@@ -125,6 +125,7 @@ namespace // Concrete FSM implementation
                                           a_row<Song3, PreviousSong, Song2, &pl::start_prev_song>
                                           //    +---------+-------------+---------+---------------------+----------------------+
                                           >
+
             {
             };
             // Replaces the default no-transition response.
@@ -164,26 +165,28 @@ namespace // Concrete FSM implementation
 
         // Transition table for player
         struct transition_table : mpl::vector<
-            //      Start     Event         Next      Action               Guard
-            //    +---------+-------------+---------+---------------------+----------------------+
-            a_row < Stopped , play        , Playing , &p::start_playback                         >,
-            a_row < Stopped , open_close  , Open    , &p::open_drawer                            >,
-            a_row < Stopped , stop        , Stopped , &p::stopped_again                          >,
-            //    +---------+-------------+---------+---------------------+----------------------+
-            a_row < Open    , open_close  , Empty   , &p::close_drawer                         >,
-            //    +---------+-------------+---------+---------------------+----------------------+
-            a_row < Empty   , open_close  , Open    , &p::open_drawer                          >,
-            a_row < Empty   , cd_detected , Stopped , &p::store_cd_info                        >,
-            //    +---------+-------------+---------+---------------------+----------------------+
-            a_row < Playing , stop        , Stopped , &p::stop_playback                        >,
-            a_row < Playing , pause       , Paused  , &p::pause_playback                       >,
-            a_row < Playing , open_close  , Open    , &p::stop_and_open                        >,
-            //    +---------+-------------+---------+---------------------+----------------------+
-            a_row < Paused  , end_pause   , Playing , &p::resume_playback                      >,
-            a_row < Paused  , stop        , Stopped , &p::stop_playback                        >,
-            a_row < Paused  , open_close  , Open    , &p::stop_and_open                        >
-            //    +---------+-------------+---------+---------------------+----------------------+
-        > {};
+                                      //      Start     Event         Next      Action               Guard
+                                      //    +---------+-------------+---------+---------------------+----------------------+
+                                      a_row<Stopped, play, Playing, &p::start_playback>,
+                                      a_row<Stopped, open_close, Open, &p::open_drawer>,
+                                      a_row<Stopped, stop, Stopped, &p::stopped_again>,
+                                      //    +---------+-------------+---------+---------------------+----------------------+
+                                      a_row<Open, open_close, Empty, &p::close_drawer>,
+                                      //    +---------+-------------+---------+---------------------+----------------------+
+                                      a_row<Empty, open_close, Open, &p::open_drawer>,
+                                      a_row<Empty, cd_detected, Stopped, &p::store_cd_info>,
+                                      //    +---------+-------------+---------+---------------------+----------------------+
+                                      a_row<Playing, stop, Stopped, &p::stop_playback>,
+                                      a_row<Playing, pause, Paused, &p::pause_playback>,
+                                      a_row<Playing, open_close, Open, &p::stop_and_open>,
+                                      //    +---------+-------------+---------+---------------------+----------------------+
+                                      a_row<Paused, end_pause, Playing, &p::resume_playback>,
+                                      a_row<Paused, stop, Stopped, &p::stop_playback>,
+                                      a_row<Paused, open_close, Open, &p::stop_and_open>
+                                      //    +---------+-------------+---------+---------------------+----------------------+
+                                      >
+        {
+        };
 
         // Replaces the default no-transition response.
         template <class FSM, class Event>

@@ -264,7 +264,7 @@
         <collision name='collision'>
           <geometry>
             <box>
-              <size>1 1 1</size>
+              <size>1 1 0.4</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -283,16 +283,11 @@
         </collision>
         <visual name='visual'>
           <geometry>
-            <box>
-              <size>1 1 1</size>
-            </box>
+            <mesh>
+              <uri>model://aruco/aruco_drop_zone_100.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
           </geometry>
-          <material>
-            <script>
-              <name>Gazebo/Yellow</name>
-              <uri>file://media/materials/scripts/gazebo.material</uri>
-            </script>
-          </material>
         </visual>
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
@@ -311,7 +306,7 @@
             <iyz>0</iyz>
             <izz>0.125</izz>
           </inertia>
-          <pose>0 0 0 0 -0 0</pose>
+          <pose>0 0 0 0 0 0</pose>
         </inertial>
         <collision name='collision'>
           <geometry>
@@ -336,17 +331,11 @@
         </collision>
         <visual name='visual'>
           <geometry>
-            <cylinder>
-              <radius>0.5</radius>
-              <length>0.999997</length>
-            </cylinder>
+            <mesh>
+              <uri>model://aruco/aruco_landing_pad_0.dae</uri>
+              <scale>1 1 0.3</scale>
+            </mesh>
           </geometry>
-          <material>
-            <script>
-              <name>Gazebo/Green</name>
-              <uri>file://media/materials/scripts/gazebo.material</uri>
-            </script>
-          </material>
         </visual>
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
@@ -399,23 +388,23 @@
         </link>
       </model>
       <model name='unit_box'>
-        <pose>-4 4 0.08 0 0 0</pose>
+        <pose>4 6 0.05 0 0 0</pose>
         <scale>2 2 0.15</scale>
+        <link name='link'>
+          <pose>4 6 0.1 0 0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 -0 0 0 -0 0</acceleration>
+          <wrench>0 -0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='unit_cylinder'>
+        <pose>-4 4 0.05 0 0 0</pose>
+        <scale>2 2 0.1</scale>
         <link name='link'>
           <pose>-4 4 0.08 0 0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='unit_cylinder'>
-        <pose>4 6 0.05 0 0 0</pose>
-        <scale>2 2 0.05</scale>
-        <link name='link'>
-          <pose>4 6 0.05 0 0 0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 -0 0 0 -0 0</acceleration>
-          <wrench>0 -0 0 0 -0 0</wrench>
         </link>
       </model>
       <light name='sun'>
