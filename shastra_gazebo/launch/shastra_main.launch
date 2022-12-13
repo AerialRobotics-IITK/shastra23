@@ -46,4 +46,9 @@
 
     <node name="rqt_image_view" pkg="rqt_image_view" type="rqt_image_view" output="screen"/>
 
+    <!-- Detection Launch File -->
+    
+    <include file="$(find shastra_detection)/launch/shastra_detection.launch">
+    </include>
+
 </launch>
