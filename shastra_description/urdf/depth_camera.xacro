@@ -33,8 +33,6 @@
         </link>
         <gazebo reference="${namespace}/depth_camera">
             <material>Gazebo/Orange</material>
-        </gazebo>
-        <gazebo reference="${namespace}/depth_camera">
             <sensor name="camera" type="depth">
                 <update_rate>20</update_rate>
                 <camera>
