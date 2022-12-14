@@ -48,7 +48,7 @@
 
     <!-- Detection Launch File -->
     
-    <include file="$(find shastra_detection)/launch/shastra_detection.launch">
-    </include>
+    <!-- <include file="$(find shastra_detection)/launch/shastra_detection.launch">
+    </include> -->
 
 </launch>
