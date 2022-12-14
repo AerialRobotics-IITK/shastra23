@@ -13,3 +13,6 @@
 	path = mav_control_rw
 	url = git@github.com:AerialRobotics-IITK/mav_control_rw.git
 	branch = base_2022
+[submodule "mav_trajectory_generation"]
+	path = mav_trajectory_generation
+	url = git@github.com:AerialRobotics-IITK/mav_trajectory_generation.git
