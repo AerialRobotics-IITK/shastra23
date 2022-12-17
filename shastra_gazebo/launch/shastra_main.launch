@@ -44,6 +44,4 @@
         <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
     </group>
 
-    <node name="rqt_image_view" pkg="rqt_image_view" type="rqt_image_view" output="screen"/>
-
 </launch>
