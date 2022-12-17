@@ -6,8 +6,7 @@ namespace ariitk::state_machine
         callbacks
     */
     void mav_pose_cb_(const geometry_msgs::PoseStamped &msg) { mav_pose_ = msg; }
-    void utm_pose_cb_(const shastra_msgs::UTMPose &msg) { utm_pose_ = msg; }
-    void lidar_dist_cb_(const std_msgs::UInt16 &msg) { lidar_dist_ = msg; }
+    // void utm_pose_cb_(const shastra_msgs::UTMPose &msg) { utm_pose_ = msg; }
     void state_cb_(const mavros_msgs::State &msg) { mav_mode_ = msg; }
     void pose_estimator_cb_(const shastra_msgs::TagPose &msg) { tag_pose_ = msg; }
     void wp_reached_cb_(const mavros_msgs::WaypointReached &msg) { prev_wp = msg; }
@@ -15,24 +14,24 @@ namespace ariitk::state_machine
     /*
         Transition actions
     */
-    /// @brief TakeOff Action: Wait for UTM position, set_mode to mission
+    /// @brief TakeOff Action: Wait for MAV position, set_mode to mission
     /// @param cmd
     void fsm::TakeOff(CmdTakeOff const &cmd)
     {
         if (verbose)
             echo("Starting Execution");
 
-        utm_pose_.pose.position.z = -DBL_MAX;
+        mav_pose_.pose.position.z = -DBL_MAX;
         if (verbose)
-            echo("Waiting for UTM Position");
-        while (utm_pose_.pose.position.z == -DBL_MAX)
+            echo("Waiting for MAV Position");
+        while (mav_pose_.pose.position.z == -DBL_MAX)
         {
             ros::spinOnce();
             LOOP_RATE.sleep();
         }
         if (verbose)
-            echo("Received UTM Position");
-        lz_pose_ = utm_pose_; // takeoff position is landing zone pose as well
+            echo("Received MAV Position");
+        lz_pose_ = mav_pose_; // takeoff position is landing zone pose as well
 
         mavros_msgs::SetMode mission_set_mode_;
         mission_set_mode_.request.custom_mode = "AUTO.MISSION";
@@ -110,8 +109,7 @@ namespace ariitk::state_machine
         {
             ros::spinOnce();
             LOOP_RATE.sleep();
-            // if (tag_pose_.pose.orientation.)
-            // TODO: check if actual detection by waiting
+            // check if actual detection by waiting
             if (tag_pose_.id.data == ID_AR_BOX || tag_pose_.id.data == ID_CLR_BOX)
                 i += 0; // increase counter on detection
             else
@@ -191,7 +189,7 @@ namespace ariitk::state_machine
     {
         if (verbose)
             echo("Descend mode in OFFBOARD_MODE");
-        while (tag_pose_.pose.header.stamp.sec != ros::Time::now().sec and ros::ok())
+        while (ros::ok())
         {
             ros::spinOnce();
             LOOP_RATE.sleep();
@@ -203,7 +201,35 @@ namespace ariitk::state_machine
 
     void fsm::GoToDZ(CmdDropZone const &cmd) {}
 
-    void fsm::GoToLZ(CmdLandZone const &cmd) {}
+    void fsm::GoToLZ(CmdLandZone const &cmd)
+    {
+        if (verbose)
+            echo(" Going to LZ");
+
+        geometry_msgs::PointStamped mission_msg;
+
+        mav_pose_.pose.position.z = -DBL_MAX;
+        if (verbose)
+            echo("Waiting for MAV position");
+        while (mav_pose_.pose.position.z == -DBL_MAX)
+        {
+            ros::spinOnce();
+            LOOP_RATE.sleep();
+        }
+        if (verbose)
+            echo("Received MAV position");
+
+        mission_msg.header.stamp = ros::Time::now();
+        mission_msg.point.x = lz_pose_.pose.position.x;
+        mission_msg.point.y = lz_pose_.pose.position.y;
+        mission_msg.point.z = mav_pose_.pose.position.z;
+
+        if (verbose)
+            echo("Sending MAV to LZ: " << mission_msg.point.x << " " << mission_msg.point.y << " " << mission_msg.point.z);
+
+        command_pub_.publish(mission_msg);
+        return;
+    }
 
     /// @brief Hovering Action: Change to LOITER_MODE
     /// @param cmd
@@ -244,7 +270,30 @@ namespace ariitk::state_machine
         hoverRate.sleep();
     }
 
-    void fsm::Landing(CmdLand const &cmd) {}
+    void fsm::Landing(CmdLand const &cmd)
+    {
+        if (verbose)
+            echo("Landing now");
+
+        mavros_msgs::SetMode land_set_mode;
+        bool mode_set_ = false;
+        land_set_mode.request.custom_mode = "AUTO.LAND";
+        if (verbose)
+            echo("Changing mode to LAND");
+        while (!mode_set_)
+        {
+            ros::spinOnce();
+            if (set_mode_client.call(land_set_mode) && land_set_mode.response.mode_sent)
+            {
+                if (verbose)
+                    echo("LAND enabled");
+                mode_set_ = true;
+            }
+            LOOP_RATE.sleep();
+        }
+        if (verbose)
+            echo("Changed mode to LAND");
+    }
 
     /*
         Guards

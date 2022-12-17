@@ -28,7 +28,7 @@ using std::string;
 
 #include <tf2/LinearMath/Quaternion.h>
 
-#define echo(X) ROS_INFO_STREAM("[PLN]: " << (X));
+#define echo(X) ROS_INFO_STREAM("[PLN]: " << X);
 #define FSM_INFO(X) ROS_WARN_STREAM("[FSM]: " << X);
 
 namespace ariitk::state_machine
@@ -46,9 +46,9 @@ namespace ariitk::state_machine
     inline ros::Rate LOOP_RATE(10);
 
     inline std_msgs::UInt16 lidar_dist_;
-    inline geometry_msgs::PoseStamped mav_pose_;
+    inline geometry_msgs::PoseStamped mav_pose_, lz_pose_;
     inline shastra_msgs::TagPose tag_pose_;
-    inline shastra_msgs::UTMPose utm_pose_, lz_pose_;
+    // inline shastra_msgs::UTMPose utm_pose_, lz_pose_;
     inline mavros_msgs::State mav_mode_;
     inline mavros_msgs::WaypointReached prev_wp;
 
@@ -65,7 +65,7 @@ namespace ariitk::state_machine
         callbacks
     */
     void mav_pose_cb_(const geometry_msgs::PoseStamped &msg);
-    void utm_pose_cb_(const shastra_msgs::UTMPose &msg);
+    // void utm_pose_cb_(const shastra_msgs::UTMPose &msg);
     void lidar_dist_cb_(const std_msgs::UInt16 &msg);
     void state_cb_(const mavros_msgs::State &msg);
     void pose_estimator_cb_(const shastra_msgs::TagPose &msg);
@@ -86,7 +86,7 @@ namespace ariitk::state_machine
     inline ros::Subscriber loc_pose_sub_ = NH.subscribe(pose_estimator, 1, pose_estimator_cb_);
     inline ros::Subscriber lidar_dist_sub_ = NH.subscribe(lidar_distance, 5, lidar_dist_cb_);
     inline ros::Subscriber state_sub_ = NH.subscribe(state, 1, state_cb_);
-    inline ros::Subscriber utm_pose_sub_ = NH.subscribe(utm_pose, 1, utm_pose_cb_);
+    // inline ros::Subscriber utm_pose_sub_ = NH.subscribe(utm_pose, 1, utm_pose_cb_);
     inline ros::Subscriber mission_wp_sub = NH.subscribe(mission_reached, 10, wp_reached_cb_);
 
     /*
