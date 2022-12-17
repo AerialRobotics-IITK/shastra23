@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<launch>
+    <node name="package_detector_node" pkg="shastra_detection" type="package_detector_node"/>
+</launch>
