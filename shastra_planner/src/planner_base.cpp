@@ -2,6 +2,19 @@
 
 namespace ariitk::state_machine
 {
+    /*
+        callbacks
+    */
+    void mav_pose_cb_(const geometry_msgs::PoseStamped &msg) { mav_pose_ = msg; }
+    void utm_pose_cb_(const shastra_msgs::UTMPose &msg) { utm_pose_ = msg; }
+    void lidar_dist_cb_(const std_msgs::UInt16 &msg) { lidar_dist_ = msg; }
+    void state_cb_(const mavros_msgs::State &msg) { mav_mode_ = msg; }
+    void pose_estimator_cb_(const shastra_msgs::TagPose &msg) { tag_pose_ = msg; }
+    void wp_reached_cb_(const mavros_msgs::WaypointReached &msg) { prev_wp = msg; }
+
+    /*
+        Transition actions
+    */
     /// @brief TakeOff Action: Wait for UTM position, set_mode to mission
     /// @param cmd
     void fsm::TakeOff(CmdTakeOff const &cmd)
@@ -232,4 +245,13 @@ namespace ariitk::state_machine
     }
 
     void fsm::Landing(CmdLand const &cmd) {}
+
+    /*
+        Guards
+    */
+    bool fsm::BoxFound(CmdHover const &cmd) { return false; }
+    bool fsm::BoxAligned(CmdHover const &cmd) { return false; }
+    bool fsm::BoxVisible(CmdDescend const &cmd) { return false; }
+    bool fsm::BoxNotVisible(CmdDropZone const &cmd) { return false; }
+    bool fsm::StopMission(CmdLand const &cmd) { return false; }
 }

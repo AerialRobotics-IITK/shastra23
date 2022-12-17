@@ -150,14 +150,14 @@ namespace ariitk::state_machine
     typedef msm::back::state_machine<fsm> fsm_;
 
     // helper function -- output current state
-    void echo_state(fsm_ const &msg)
+    inline void echo_state(fsm_ const &msg)
     {
         if (verbose)
             FSM_INFO("Current state -- " << fsm::state_names_[msg.current_state()[0]]);
     }
 
     // state publisher
-    void statePublish(ros::NodeHandle nh, fsm_ *fsm)
+    inline void statePublish(ros::NodeHandle nh, fsm_ *fsm)
     {
         ros::Publisher statePub = nh.advertise<std_msgs::String>("curr_state", 10);
         ros::Rate loopRate(10);
