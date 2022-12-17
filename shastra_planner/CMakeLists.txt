@@ -144,6 +144,9 @@ include_directories(
 add_executable(planner src/planner_base.cpp src/planned.cpp)
 target_link_libraries(planner ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
+add_executable(planned_checkpoint src/planned_checkpoint.cpp)
+target_link_libraries(planned_checkpoint ${catkin_LIBRARIES})
+
 # # Rename C++ executable without prefix
 # # The above recommended prefix causes long target names, the following renames the
 # # target back to the shorter version for ease of user use
