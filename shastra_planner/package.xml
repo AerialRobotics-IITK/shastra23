@@ -54,7 +54,6 @@
   <exec_depend>roscpp</exec_depend>
   <build_export_depend>shastra_msgs</build_export_depend>
 
-
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->

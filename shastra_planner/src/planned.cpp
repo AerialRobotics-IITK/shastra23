@@ -9,12 +9,12 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "planner");
     ros::NodeHandle ph("~");
 
-    ph.getParam("height/hover", ar::hover_height);
-    ph.getParam("height/land", ar::land_height);
-    ph.getParam("height/step", ar::step_height);
+    ph.getParam("height/pickup", ar::PICKUP_HOVER_HEIGHT);
+    ph.getParam("deflection/x", ar::PICKUP_X_DEFLECTION);
+    ph.getParam("height/hover", ar::HOVER_HEIGHT);
 
     ph.getParam("delay/transition", ar::TRANSITION_TIME);
-    ph.getParam("delay/landHover", ar::land_time);
+    ph.getParam("distance_threshold", ar::DISTANCE_THRESHOLD);
 
     ros::Rate transitRate(1.0 / ar::TRANSITION_TIME);
 
@@ -95,8 +95,13 @@ int main(int argc, char **argv)
         box_number += 1;
 
         machine.process_event(ariitk::state_machine::CmdHover());
+
         if (ar::verbose)
             echo_state(machine);
+        if (box_number == 1)
+        {
+            //
+        }
     }
 
     transitRate.sleep();

@@ -12,6 +12,8 @@ using std::string;
 #include <boost/msm/front/state_machine_def.hpp>
 #include <boost/msm/front/functor_row.hpp>
 
+#include <eigen3/Eigen/Core>
+
 #include <shastra_msgs/UTMPose.h>
 #include <shastra_msgs/TagPose.h>
 #include <geometry_msgs/PoseStamped.h>
@@ -35,22 +37,26 @@ namespace ariitk::state_machine
 {
     inline const bool verbose = true;
 
-    inline double hover_height, land_height, step_height;
-    inline double HOVER_TIME = 5.0, land_time;
-    inline double DELAY_TIME = 0.5;
+    inline double PICKUP_HOVER_HEIGHT = 0.4, PICKUP_X_DEFLECTION = 0.27, HOVER_HEIGHT = 1.5;
+    inline double HOVER_TIME = 5.0, DZ_Y_OFFSET_FROM_LZ = 4.0;
+    inline double DELAY_TIME = 0.5, DISTANCE_THRESHOLD = 0.1;
+    inline double ADVANCING_FACTOR_Z = 0.05, ADVANCING_FACTOR_HORZ = 0.5;
 
     inline int8_t ID_AR_LZ = 0, ID_AR_BOX = 5, ID_CLR_BOX = 75, ID_AR_DZ = 10;
 
-    inline double TRANSITION_TIME = 5.0;
+    inline double TRANSITION_TIME = 1.0;
+
+    inline bool ALIGNED = false;
 
     inline ros::Rate LOOP_RATE(10);
 
-    inline std_msgs::UInt16 lidar_dist_;
-    inline geometry_msgs::PoseStamped mav_pose_, lz_pose_;
+    // inline std_msgs::UInt16 lidar_dist_;
+    inline geometry_msgs::PoseStamped mav_pose_, lz_pose_, dz_pose_;
     inline shastra_msgs::TagPose tag_pose_;
     // inline shastra_msgs::UTMPose utm_pose_, lz_pose_;
     inline mavros_msgs::State mav_mode_;
     inline mavros_msgs::WaypointReached prev_wp;
+    inline tf2::Quaternion q;
 
     inline string mission_info = "mission_info", emag_control = "emag/control", odometry = "odometry", state = "state", utm_pose = "utm_pose", set_mode = "set_mode", mission_waypoint_pull = "mission/wpPull", pose_estimator = "pose_estimator/aruco_pose", lidar_distance = "lidar/distance/distance_raw", land = "mavros/cmd/land", mission_reached = "mission/reached";
 
@@ -58,15 +64,13 @@ namespace ariitk::state_machine
             State Variables
     */
     inline bool CONTINUE_MISSION = true;
-    inline bool BOX_ATTACHED = true;
-    inline bool AT_LZ = false;
 
     /*
         callbacks
     */
     void mav_pose_cb_(const geometry_msgs::PoseStamped &msg);
     // void utm_pose_cb_(const shastra_msgs::UTMPose &msg);
-    void lidar_dist_cb_(const std_msgs::UInt16 &msg);
+    // void lidar_dist_cb_(const std_msgs::UInt16 &msg);
     void state_cb_(const mavros_msgs::State &msg);
     void pose_estimator_cb_(const shastra_msgs::TagPose &msg);
     void wp_reached_cb_(const mavros_msgs::WaypointReached &msg);
@@ -84,7 +88,7 @@ namespace ariitk::state_machine
     */
     inline ros::Subscriber mav_pose_sub_ = NH.subscribe(odometry, 10, mav_pose_cb_);
     inline ros::Subscriber loc_pose_sub_ = NH.subscribe(pose_estimator, 1, pose_estimator_cb_);
-    inline ros::Subscriber lidar_dist_sub_ = NH.subscribe(lidar_distance, 5, lidar_dist_cb_);
+    // inline ros::Subscriber lidar_dist_sub_ = NH.subscribe(lidar_distance, 5, lidar_dist_cb_);
     inline ros::Subscriber state_sub_ = NH.subscribe(state, 1, state_cb_);
     // inline ros::Subscriber utm_pose_sub_ = NH.subscribe(utm_pose, 1, utm_pose_cb_);
     inline ros::Subscriber mission_wp_sub = NH.subscribe(mission_reached, 10, wp_reached_cb_);
@@ -129,4 +133,9 @@ namespace ariitk::state_machine
         std::string state_name;
         bool verbose;
     };
+
+    inline double point_distance(geometry_msgs::PoseStamped p1, geometry_msgs::PointStamped p2)
+    {
+        return sqrt(pow(p1.pose.position.x - p2.point.x, 2) + pow(p1.pose.position.y - p2.point.y, 2) + pow(p1.pose.position.z - p2.point.z, 2));
+    }
 }

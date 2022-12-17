@@ -8,7 +8,13 @@ namespace ariitk::state_machine
     void mav_pose_cb_(const geometry_msgs::PoseStamped &msg) { mav_pose_ = msg; }
     // void utm_pose_cb_(const shastra_msgs::UTMPose &msg) { utm_pose_ = msg; }
     void state_cb_(const mavros_msgs::State &msg) { mav_mode_ = msg; }
-    void pose_estimator_cb_(const shastra_msgs::TagPose &msg) { tag_pose_ = msg; }
+    void pose_estimator_cb_(const shastra_msgs::TagPose &msg)
+    {
+        tag_pose_ = msg;
+        tag_pose_.pose.point.x /= 100;
+        tag_pose_.pose.point.y /= 100;
+        tag_pose_.pose.point.z /= 100; // converting to meters
+    }
     void wp_reached_cb_(const mavros_msgs::WaypointReached &msg) { prev_wp = msg; }
 
     /*
@@ -60,6 +66,25 @@ namespace ariitk::state_machine
     /// @param cmd
     void fsm::GoToGZ(CmdGridZone const &cmd)
     {
+        mavros_msgs::SetMode mission_set_mode_;
+        mission_set_mode_.request.custom_mode = "AUTO.MISSION";
+        bool mode_set_ = false;
+
+        while (!mode_set_)
+        {
+            ros::spinOnce();
+            if (set_mode_client.call(mission_set_mode_) and mission_set_mode_.response.mode_sent)
+            {
+                if (verbose)
+                    echo("MISSION_MODE enabled");
+                mode_set_ = true;
+            }
+            LOOP_RATE.sleep();
+        }
+
+        if (verbose)
+            echo("Changed to MISSION_MODE");
+
         if (verbose)
             echo("Going to Grid in MISSION_MODE");
         if (verbose)
@@ -92,13 +117,12 @@ namespace ariitk::state_machine
         // getting ready for offboard mode
         mavros_msgs::SetMode offb_set_mode;
         offb_set_mode.request.custom_mode = "OFFBOARD";
-        bool mode_set_ = false;
+        mode_set_ = false;
 
         if (verbose)
             echo("Searching for box");
 
         geometry_msgs::PoseStamped mission_msg;
-        tf2::Quaternion q;
         q.setRPY(0, 0, 0);
         mission_msg.pose.orientation.w = q.getW();
         mission_msg.pose.orientation.x = q.getX();
@@ -111,12 +135,12 @@ namespace ariitk::state_machine
             LOOP_RATE.sleep();
             // check if actual detection by waiting
             if (tag_pose_.id.data == ID_AR_BOX || tag_pose_.id.data == ID_CLR_BOX)
-                i += 0; // increase counter on detection
+                i += 1; // increase counter on detection
             else
-                i -= 0; // decrement counter if no detection
+                i -= 1; // decrement counter if no detection
 
             // exit mission, box not found throughout
-            if (prev_wp.wp_seq == num_wp)
+            if (prev_wp.wp_seq == num_wp) // !PROBLEM
             {
                 if (verbose)
                     echo("Reached last waypoint, going home");
@@ -124,7 +148,7 @@ namespace ariitk::state_machine
                 mission_msg.pose.position = lz_pose_.pose.position; // go to LZ
                 mission_msg.pose.position.z = mav_pose_.pose.position.z;
 
-                for (int i = 0; i < 10; i++) // 10 packets sent before offboard
+                for (int i = 0; i < 10; i++) // 10 packets sent before offboard, will take 1 second to complete
                 {
                     mission_msg.header.stamp = ros::Time::now();
                     command_pub_.publish(mission_msg);
@@ -141,6 +165,7 @@ namespace ariitk::state_machine
                         {
                             echo("OFFBOARD_MODE enabled");
                             echo("Going to Landing Zone");
+                            return;
                         }
 
                         mode_set_ = true;
@@ -189,22 +214,114 @@ namespace ariitk::state_machine
     {
         if (verbose)
             echo("Descend mode in OFFBOARD_MODE");
-        while (ros::ok())
+        geometry_msgs::PoseStamped mission_msg;
+        q.setRPY(0, 0, 0);
+        mission_msg.pose.orientation.w = q.getW();
+        mission_msg.pose.orientation.x = q.getX();
+        mission_msg.pose.orientation.y = q.getY();
+        mission_msg.pose.orientation.z = q.getZ();
+        mission_msg.header.stamp = ros::Time::now();
+        // px coord system is NED
+        // mavros coord system is different mavros_x -> px4_x, mavros_y-> -px4_y, mavros_z -> -px4_z
+        while (mav_pose_.pose.position.z >= PICKUP_HOVER_HEIGHT)
         {
+            ros::spinOnce();
+            mission_msg.pose.position.x = mav_pose_.pose.position.x + ADVANCING_FACTOR_HORZ * tag_pose_.pose.point.x;
+            mission_msg.pose.position.y = mav_pose_.pose.position.y - ADVANCING_FACTOR_HORZ * tag_pose_.pose.point.y;
+            mission_msg.pose.position.z = mav_pose_.pose.position.z - ADVANCING_FACTOR_Z * tag_pose_.pose.point.z;
+            command_pub_.publish(mission_msg);
+            LOOP_RATE.sleep();
+        }
+        if (point_distance(mav_pose_, tag_pose_.pose) < DISTANCE_THRESHOLD)
+            ALIGNED = true;
+
+        if (verbose)
+            echo("Detection based pose reached, trying to align in X now");
+        mission_msg.pose.position.x = mav_pose_.pose.position.x + PICKUP_X_DEFLECTION;
+        for (int i = 0; i < 10 && ros::ok(); i++)
+        {
+            command_pub_.publish(mission_msg);
             ros::spinOnce();
             LOOP_RATE.sleep();
         }
-        // now assuming that tag_pose_ contains the correct location of box
+        if (verbose)
+            echo("Drifting lower now, fingers crossed");
+        mission_msg.pose.position.z = mav_pose_.pose.position.z - 0.05;
+        for (int i = 0; i < 10 && ros::ok(); i++)
+        {
+            command_pub_.publish(mission_msg);
+            ros::spinOnce();
+            LOOP_RATE.sleep();
+        }
     }
 
-    void fsm::Ascend(CmdAscend const &cmd) {}
+    void fsm::Ascend(CmdAscend const &cmd)
+    {
+        if (verbose)
+            echo("Ascend mode in OFFBOARD_MODE");
+        geometry_msgs::PoseStamped mission_msg;
+        mission_msg.pose.position.z = mav_pose_.pose.position.z + HOVER_HEIGHT;
 
-    void fsm::GoToDZ(CmdDropZone const &cmd) {}
+        for (int i = 0; i < 10 && ros::ok(); i++)
+        {
+            command_pub_.publish(mission_msg);
+            ros::spinOnce();
+            LOOP_RATE.sleep();
+        }
+        return;
+    }
+
+    void fsm::GoToDZ(CmdDropZone const &cmd)
+    {
+        dz_pose_.pose.position = lz_pose_.pose.position;
+        dz_pose_.pose.position.y = lz_pose_.pose.position.y + DZ_Y_OFFSET_FROM_LZ;
+        dz_pose_.pose.position.z = HOVER_HEIGHT;
+        if (verbose)
+            echo("Going to DropZone");
+        for (int i = 0; i < 10; i++)
+        {
+            ros::spinOnce();
+            command_pub_.publish(dz_pose_);
+            LOOP_RATE.sleep();
+        }
+
+        // try to detect DropZone AR tag
+        for (int i = 0; i < 10;)
+        {
+            ros::spinOnce();
+            if (tag_pose_.id.data == ID_AR_DZ)
+                i += 1;
+            else
+                i -= 1;
+        }
+        if (verbose)
+            echo("DropZone detected");
+
+        geometry_msgs::PoseStamped mission_msg;
+        q.setRPY(0, 0, 0);
+        mission_msg.pose.orientation.w = q.getW();
+        mission_msg.pose.orientation.x = q.getX();
+        mission_msg.pose.orientation.y = q.getY();
+        mission_msg.pose.orientation.z = q.getZ();
+
+        while (ros::ok())
+        {
+            ros::spinOnce();
+            mission_msg.header.stamp = ros::Time::now();
+            mission_msg.pose.position.x = mav_pose_.pose.position.x + ADVANCING_FACTOR_HORZ * tag_pose_.pose.point.x;
+            mission_msg.pose.position.y = mav_pose_.pose.position.y - ADVANCING_FACTOR_HORZ * tag_pose_.pose.point.y;
+            mission_msg.pose.position.z = HOVER_HEIGHT;
+            command_pub_.publish(mission_msg);
+            LOOP_RATE.sleep();
+        }
+
+        return;
+    }
 
     void fsm::GoToLZ(CmdLandZone const &cmd)
     {
         if (verbose)
-            echo(" Going to LZ");
+            echo("Going to LZ");
 
         geometry_msgs::PointStamped mission_msg;
 
@@ -227,11 +344,21 @@ namespace ariitk::state_machine
         if (verbose)
             echo("Sending MAV to LZ: " << mission_msg.point.x << " " << mission_msg.point.y << " " << mission_msg.point.z);
 
-        command_pub_.publish(mission_msg);
+        while (ros::ok())
+        {
+            ros::spinOnce();
+            command_pub_.publish(mission_msg);
+            if (point_distance(mav_pose_, mission_msg) < DISTANCE_THRESHOLD)
+            {
+                ALIGNED = true;
+                return;
+            }
+            LOOP_RATE.sleep();
+        }
         return;
     }
 
-    /// @brief Hovering Action: Change to LOITER_MODE
+    /// @brief Hovering Action: Wait for HOVER_TIME seconds in the current position
     /// @param cmd
     void fsm::Hovering(CmdHover const &cmd)
     {
@@ -242,6 +369,7 @@ namespace ariitk::state_machine
         //? the alloted sleep time! I also don't know where does mavros store them
         //? and in what form they are being used, why throw multiple at mavros?
         //! Try by running that mavros_node again, but end sending waypoints
+        //* mavros needs at least 10 waypoints to work ok, that's what we concluded from trying
 
         /*
         mavros_msgs::SetMode hold_set_mode;
@@ -298,9 +426,65 @@ namespace ariitk::state_machine
     /*
         Guards
     */
-    bool fsm::BoxFound(CmdHover const &cmd) { return false; }
-    bool fsm::BoxAligned(CmdHover const &cmd) { return false; }
-    bool fsm::BoxVisible(CmdDescend const &cmd) { return false; }
-    bool fsm::BoxNotVisible(CmdDropZone const &cmd) { return false; }
-    bool fsm::StopMission(CmdLand const &cmd) { return false; }
+    bool fsm::BoxAligned(CmdHover const &cmd)
+    {
+        if (ALIGNED)
+        {
+            ALIGNED = false;
+            return true;
+        }
+        return false;
+    }
+
+    bool fsm::BoxVisible(CmdDescend const &cmd)
+    {
+        while (ros::ok())
+        {
+            ros::spinOnce();
+            if (tag_pose_.id.data == ID_AR_BOX || tag_pose_.id.data == ID_CLR_BOX)
+            {
+                if (verbose)
+                    echo("Box Visible");
+                return true;
+            }
+            else
+            {
+                if (verbose)
+                    echo("Box not Visible");
+                return false;
+            }
+        }
+        if (verbose)
+            echo("ROS Not Ok");
+        return false;
+    }
+
+    bool fsm::BoxNotVisible(CmdDropZone const &cmd)
+    {
+        while (ros::ok())
+        {
+            ros::spinOnce();
+            if (tag_pose_.id.data == ID_AR_BOX || tag_pose_.id.data == ID_CLR_BOX)
+            {
+                if (verbose)
+                    echo("Box Visible");
+                return false;
+            }
+            else
+            {
+                if (verbose)
+                    echo("Box not Visible");
+                return true;
+            }
+        }
+        if (verbose)
+            echo("ROS Not Ok");
+        return false;
+    }
+
+    bool fsm::StopMission(CmdLand const &cmd)
+    {
+        CONTINUE_MISSION = false;
+        return false;
+    }
 }

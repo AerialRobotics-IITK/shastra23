@@ -133,13 +133,13 @@ namespace ariitk::state_machine
                 a_row<    Hover         ,  CmdLandZone  ,  LandZone      ,  &fsm::GoToLZ                                >,
                   row<    Hover         ,  CmdLand      ,  Rest          ,  &fsm::Landing     ,  &fsm::StopMission      >,
         // +++ ------- + -------------- + ------------- + -------------- + ------------------ + ---------------------- +++
-                  row<    GridZone      ,  CmdHover     ,  Hover         ,  &fsm::Hovering    ,  &fsm::BoxFound         >,
+                a_row<    GridZone      ,  CmdHover     ,  Hover         ,  &fsm::Hovering                              >,
         // +++ ------- + -------------- + ------------- + -------------- + ------------------ + ---------------------- +++
                   row<    Descent       ,  CmdHover     ,  Hover         ,  &fsm::Hovering    ,  &fsm::BoxAligned       >,
         // +++ ------- + -------------- + ------------- + -------------- + ------------------ + ---------------------- +++
                 a_row<    Ascent        ,  CmdHover     ,  Hover         ,  &fsm::Hovering                              >,
         // +++ ------- + -------------- + ------------- + -------------- + ------------------ + ---------------------- +++
-                a_row<    DropZone      ,  CmdHover     ,  Hover         ,  &fsm::Hovering                              >
+                  row<    DropZone      ,  CmdHover     ,  Hover         ,  &fsm::Hovering    ,  &fsm::BoxAligned       >
         // +++ ------- + -------------- + ------------- + -------------- + ------------------ + ---------------------- +++
 
         >{};
