@@ -2,7 +2,7 @@
 
 #include <shastra_planner/planner_utils.hpp>
 
-namespace ariitk::state_machine
+namespace state_machine
 {
     namespace msm = boost::msm;
     namespace mpl = boost::mpl;
@@ -171,4 +171,4 @@ namespace ariitk::state_machine
         }
     }
 
-} // namespace ariitk::state_machine
+} // namespace state_machine

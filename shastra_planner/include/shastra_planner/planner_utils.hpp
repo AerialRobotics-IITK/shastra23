@@ -33,7 +33,7 @@ using std::string;
 #define echo(X) ROS_INFO_STREAM("[PLN]: " << X);
 #define FSM_INFO(X) ROS_WARN_STREAM("[FSM]: " << X);
 
-namespace ariitk::state_machine
+namespace state_machine
 {
     inline const bool verbose = true;
 

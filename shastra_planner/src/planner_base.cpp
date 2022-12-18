@@ -1,6 +1,6 @@
 #include <shastra_planner/planner.hpp>
 
-namespace ariitk::state_machine
+namespace state_machine
 {
     /*
         callbacks

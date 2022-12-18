@@ -1,11 +1,11 @@
 #include <shastra_planner/planner.hpp>
 
-using ariitk::state_machine::echo_state;
-std::vector<std::string> ariitk::state_machine::fsm::state_names_ = {"Rest", "Hover", "GridZone", "Descent", "Ascent", "DropZone", "LandZone"};
+using state_machine::echo_state;
+std::vector<std::string> state_machine::fsm::state_names_ = {"Rest", "Hover", "GridZone", "Descent", "Ascent", "DropZone", "LandZone"};
 
 int main(int argc, char **argv)
 {
-    namespace ar = ariitk::state_machine;
+    namespace ar = state_machine;
     ros::init(argc, argv, "planner");
     ros::NodeHandle ph("~");
 
@@ -18,20 +18,20 @@ int main(int argc, char **argv)
 
     ros::Rate transitRate(1.0 / ar::TRANSITION_TIME);
 
-    ariitk::state_machine::fsm_ machine;
+    state_machine::fsm_ machine;
     machine.start();
 
-    // auto state = std::async(std::launch::async, ariitk::state_machine::statePublish, ph, &machine);
+    // auto state = std::async(std::launch::async, state_machine::statePublish, ph, &machine);
 
-    machine.process_event(ariitk::state_machine::CmdTakeOff());
+    machine.process_event(state_machine::CmdTakeOff());
     if (ar::verbose)
         echo_state(machine);
 
     int box_number = 0;
 
-    while (ariitk::state_machine::CONTINUE_MISSION and box_number < 2)
+    while (state_machine::CONTINUE_MISSION and box_number < 2)
     {
-        machine.process_event(ariitk::state_machine::CmdGridZone());
+        machine.process_event(state_machine::CmdGridZone());
         if (ar::verbose)
             echo_state(machine);
 
@@ -41,45 +41,45 @@ int main(int argc, char **argv)
         msg.data = 1;
         for (int i = 0; i < 10; i++) // send msg 10 times
         {
-            ariitk::state_machine::emag_pub_.publish(msg);
+            state_machine::emag_pub_.publish(msg);
             ar::LOOP_RATE.sleep();
         }
 
         transitRate.sleep();
         // ? WHAT WOULD HAPPEN IN THIS TRANSIT SLEEP STATE? WHICH MODE?
         // * this planner would enter sleep, and mav would continue on its own
-        machine.process_event(ariitk::state_machine::CmdHover());
+        machine.process_event(state_machine::CmdHover());
         if (ar::verbose)
             echo_state(machine);
 
         box_number += 1;
         transitRate.sleep();
-        machine.process_event(ariitk::state_machine::CmdDescend());
+        machine.process_event(state_machine::CmdDescend());
         if (ar::verbose)
             echo_state(machine);
 
         transitRate.sleep();
-        machine.process_event(ariitk::state_machine::CmdHover());
+        machine.process_event(state_machine::CmdHover());
         if (ar::verbose)
             echo_state(machine);
 
         transitRate.sleep();
-        machine.process_event(ariitk::state_machine::CmdAscend());
+        machine.process_event(state_machine::CmdAscend());
         if (ar::verbose)
             echo_state(machine);
 
         transitRate.sleep();
-        machine.process_event(ariitk::state_machine::CmdHover());
+        machine.process_event(state_machine::CmdHover());
         if (ar::verbose)
             echo_state(machine);
 
         transitRate.sleep();
-        machine.process_event(ariitk::state_machine::CmdDropZone());
+        machine.process_event(state_machine::CmdDropZone());
         if (ar::verbose)
             echo_state(machine);
 
         transitRate.sleep();
-        machine.process_event(ariitk::state_machine::CmdHover());
+        machine.process_event(state_machine::CmdHover());
         if (ar::verbose)
             echo_state(machine);
 
@@ -88,13 +88,13 @@ int main(int argc, char **argv)
         msg.data = 0;
         for (int i = 0; i < 10; i++) // send msg 10 times
         {
-            ariitk::state_machine::emag_pub_.publish(msg);
+            state_machine::emag_pub_.publish(msg);
             ar::LOOP_RATE.sleep();
         }
 
         box_number += 1;
 
-        machine.process_event(ariitk::state_machine::CmdHover());
+        machine.process_event(state_machine::CmdHover());
 
         if (ar::verbose)
             echo_state(machine);
@@ -105,17 +105,17 @@ int main(int argc, char **argv)
     }
 
     transitRate.sleep();
-    machine.process_event(ariitk::state_machine::CmdLandZone());
+    machine.process_event(state_machine::CmdLandZone());
     if (ar::verbose)
         echo_state(machine);
 
     transitRate.sleep();
-    machine.process_event(ariitk::state_machine::CmdHover());
+    machine.process_event(state_machine::CmdHover());
     if (ar::verbose)
         echo_state(machine);
 
     transitRate.sleep();
-    machine.process_event(ariitk::state_machine::CmdLand());
+    machine.process_event(state_machine::CmdLand());
     if (ar::verbose)
         echo_state(machine);
 
