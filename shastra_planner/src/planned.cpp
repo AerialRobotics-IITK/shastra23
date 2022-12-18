@@ -8,31 +8,33 @@ int main(int argc, char **argv)
     namespace ar = state_machine;
     ros::init(argc, argv, "planner");
     ros::NodeHandle ph("~");
+    ros::Rate loopRate(10);
 
-    ph.getParam("height/pickup", ar::PICKUP_HOVER_HEIGHT);
-    ph.getParam("deflection/x", ar::PICKUP_X_DEFLECTION);
-    ph.getParam("height/hover", ar::HOVER_HEIGHT);
+    state_machine::fsm_ machine(&ph);
 
-    ph.getParam("delay/transition", ar::TRANSITION_TIME);
-    ph.getParam("distance_threshold", ar::DISTANCE_THRESHOLD);
+    ph.getParam("height/pickup", machine.PICKUP_HOVER_HEIGHT);
+    ph.getParam("deflection/x", machine.PICKUP_X_DEFLECTION);
+    ph.getParam("height/hover", machine.HOVER_HEIGHT);
 
-    ros::Rate transitRate(1.0 / ar::TRANSITION_TIME);
+    ph.getParam("delay/transition", machine.TRANSITION_TIME);
+    ph.getParam("distance_threshold", machine.DISTANCE_THRESHOLD);
 
-    state_machine::fsm_ machine;
+    ros::Rate transitRate(1.0 / machine.TRANSITION_TIME);
+
     machine.start();
 
     // auto state = std::async(std::launch::async, state_machine::statePublish, ph, &machine);
 
     machine.process_event(state_machine::CmdTakeOff());
-    if (ar::verbose)
+    if (state_machine::verbose)
         echo_state(machine);
 
     int box_number = 0;
 
-    while (state_machine::CONTINUE_MISSION and box_number < 2)
+    while (machine.CONTINUE_MISSION and box_number < 2)
     {
         machine.process_event(state_machine::CmdGridZone());
-        if (ar::verbose)
+        if (state_machine::verbose)
             echo_state(machine);
 
         // turn on EMag
@@ -41,46 +43,46 @@ int main(int argc, char **argv)
         msg.data = 1;
         for (int i = 0; i < 10; i++) // send msg 10 times
         {
-            state_machine::emag_pub_.publish(msg);
-            ar::LOOP_RATE.sleep();
+            machine.emag_pub_.publish(msg);
+            loopRate.sleep();
         }
 
         transitRate.sleep();
         // ? WHAT WOULD HAPPEN IN THIS TRANSIT SLEEP STATE? WHICH MODE?
         // * this planner would enter sleep, and mav would continue on its own
         machine.process_event(state_machine::CmdHover());
-        if (ar::verbose)
+        if (state_machine::verbose)
             echo_state(machine);
 
         box_number += 1;
         transitRate.sleep();
         machine.process_event(state_machine::CmdDescend());
-        if (ar::verbose)
+        if (state_machine::verbose)
             echo_state(machine);
 
         transitRate.sleep();
         machine.process_event(state_machine::CmdHover());
-        if (ar::verbose)
+        if (state_machine::verbose)
             echo_state(machine);
 
         transitRate.sleep();
         machine.process_event(state_machine::CmdAscend());
-        if (ar::verbose)
+        if (state_machine::verbose)
             echo_state(machine);
 
         transitRate.sleep();
         machine.process_event(state_machine::CmdHover());
-        if (ar::verbose)
+        if (state_machine::verbose)
             echo_state(machine);
 
         transitRate.sleep();
         machine.process_event(state_machine::CmdDropZone());
-        if (ar::verbose)
+        if (state_machine::verbose)
             echo_state(machine);
 
         transitRate.sleep();
         machine.process_event(state_machine::CmdHover());
-        if (ar::verbose)
+        if (state_machine::verbose)
             echo_state(machine);
 
         // turn off EMag
@@ -88,15 +90,15 @@ int main(int argc, char **argv)
         msg.data = 0;
         for (int i = 0; i < 10; i++) // send msg 10 times
         {
-            state_machine::emag_pub_.publish(msg);
-            ar::LOOP_RATE.sleep();
+            machine.emag_pub_.publish(msg);
+            loopRate.sleep();
         }
 
         box_number += 1;
 
         machine.process_event(state_machine::CmdHover());
 
-        if (ar::verbose)
+        if (state_machine::verbose)
             echo_state(machine);
         if (box_number == 1)
         {
@@ -106,17 +108,17 @@ int main(int argc, char **argv)
 
     transitRate.sleep();
     machine.process_event(state_machine::CmdLandZone());
-    if (ar::verbose)
+    if (state_machine::verbose)
         echo_state(machine);
 
     transitRate.sleep();
     machine.process_event(state_machine::CmdHover());
-    if (ar::verbose)
+    if (state_machine::verbose)
         echo_state(machine);
 
     transitRate.sleep();
     machine.process_event(state_machine::CmdLand());
-    if (ar::verbose)
+    if (state_machine::verbose)
         echo_state(machine);
 
     machine.stop();

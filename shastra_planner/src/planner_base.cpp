@@ -5,17 +5,37 @@ namespace state_machine
     /*
         callbacks
     */
-    void mav_pose_cb_(const geometry_msgs::PoseStamped &msg) { mav_pose_ = msg; }
+    void fsm::mav_pose_cb_(const geometry_msgs::PoseStamped &msg) { mav_pose_ = msg; }
     // void utm_pose_cb_(const shastra_msgs::UTMPose &msg) { utm_pose_ = msg; }
-    void state_cb_(const mavros_msgs::State &msg) { mav_mode_ = msg; }
-    void pose_estimator_cb_(const shastra_msgs::TagPose &msg)
+    void fsm::state_cb_(const mavros_msgs::State &msg) { mav_mode_ = msg; }
+    void fsm::pose_estimator_cb_(const shastra_msgs::TagPose &msg)
     {
         tag_pose_ = msg;
         tag_pose_.pose.point.x /= 100;
         tag_pose_.pose.point.y /= 100;
         tag_pose_.pose.point.z /= 100; // converting to meters
     }
-    void wp_reached_cb_(const mavros_msgs::WaypointReached &msg) { prev_wp = msg; }
+    void fsm::wp_reached_cb_(const mavros_msgs::WaypointReached &msg) { prev_wp = msg; }
+
+    void statePublish(ros::NodeHandle nh, fsm_ *fsm)
+    {
+        ros::Publisher statePub = nh.advertise<std_msgs::String>("curr_state", 10);
+        ros::Rate loopRate(10);
+
+        std_msgs::String msg;
+        while (ros::ok())
+        {
+            msg.data = fsm::state_names_[fsm->current_state()[0]];
+            statePub.publish(msg);
+            loopRate.sleep();
+        }
+    }
+
+    void echo_state(fsm_ const &msg)
+    {
+        if (verbose)
+            FSM_INFO("Current state -- " << fsm::state_names_[msg.current_state()[0]]);
+    }
 
     /*
         Transition actions
@@ -27,13 +47,15 @@ namespace state_machine
         if (verbose)
             echo("Starting Execution");
 
+        ros::Rate loopRate(10);
+
         mav_pose_.pose.position.z = -DBL_MAX;
         if (verbose)
             echo("Waiting for MAV Position");
         while (mav_pose_.pose.position.z == -DBL_MAX)
         {
             ros::spinOnce();
-            LOOP_RATE.sleep();
+            loopRate.sleep();
         }
         if (verbose)
             echo("Received MAV Position");
@@ -53,7 +75,7 @@ namespace state_machine
                     echo("MISSION_MODE enabled");
                 mode_set_ = true;
             }
-            LOOP_RATE.sleep();
+            loopRate.sleep();
         }
 
         if (verbose)
@@ -70,6 +92,8 @@ namespace state_machine
         mission_set_mode_.request.custom_mode = "AUTO.MISSION";
         bool mode_set_ = false;
 
+        ros::Rate loopRate(10);
+
         while (!mode_set_)
         {
             ros::spinOnce();
@@ -79,7 +103,7 @@ namespace state_machine
                     echo("MISSION_MODE enabled");
                 mode_set_ = true;
             }
-            LOOP_RATE.sleep();
+            loopRate.sleep();
         }
 
         if (verbose)
@@ -93,7 +117,7 @@ namespace state_machine
         while (mav_pose_.pose.position.z == -DBL_MAX)
         {
             ros::spinOnce();
-            LOOP_RATE.sleep();
+            loopRate.sleep();
         }
         if (verbose)
             echo("Received odometry"); // check if this is working, not used
@@ -132,7 +156,7 @@ namespace state_machine
         for (int i = 0; i < 10;)
         {
             ros::spinOnce();
-            LOOP_RATE.sleep();
+            loopRate.sleep();
             // check if actual detection by waiting
             if (tag_pose_.id.data == ID_AR_BOX || tag_pose_.id.data == ID_CLR_BOX)
                 i += 1; // increase counter on detection
@@ -152,7 +176,7 @@ namespace state_machine
                 {
                     mission_msg.header.stamp = ros::Time::now();
                     command_pub_.publish(mission_msg);
-                    LOOP_RATE.sleep();
+                    loopRate.sleep();
                 }
 
                 while (!mode_set_)
@@ -170,7 +194,7 @@ namespace state_machine
 
                         mode_set_ = true;
                     }
-                    LOOP_RATE.sleep();
+                    loopRate.sleep();
                 }
             }
         }
@@ -187,7 +211,7 @@ namespace state_machine
             {
                 mission_msg.header.stamp = ros::Time::now();
                 command_pub_.publish(mission_msg);
-                LOOP_RATE.sleep();
+                loopRate.sleep();
             }
 
             while (!mode_set_)
@@ -203,10 +227,10 @@ namespace state_machine
                     }
                     mode_set_ = true;
                 }
-                LOOP_RATE.sleep();
+                loopRate.sleep();
             }
 
-            LOOP_RATE.sleep();
+            loopRate.sleep();
         }
     }
 
@@ -214,6 +238,8 @@ namespace state_machine
     {
         if (verbose)
             echo("Descend mode in OFFBOARD_MODE");
+        ros::Rate loopRate(10);
+
         geometry_msgs::PoseStamped mission_msg;
         q.setRPY(0, 0, 0);
         mission_msg.pose.orientation.w = q.getW();
@@ -230,7 +256,7 @@ namespace state_machine
             mission_msg.pose.position.y = mav_pose_.pose.position.y - ADVANCING_FACTOR_HORZ * tag_pose_.pose.point.y;
             mission_msg.pose.position.z = mav_pose_.pose.position.z - ADVANCING_FACTOR_Z * tag_pose_.pose.point.z;
             command_pub_.publish(mission_msg);
-            LOOP_RATE.sleep();
+            loopRate.sleep();
         }
         if (point_distance(mav_pose_, tag_pose_.pose) < DISTANCE_THRESHOLD)
             ALIGNED = true;
@@ -242,7 +268,7 @@ namespace state_machine
         {
             command_pub_.publish(mission_msg);
             ros::spinOnce();
-            LOOP_RATE.sleep();
+            loopRate.sleep();
         }
         if (verbose)
             echo("Drifting lower now, fingers crossed");
@@ -251,7 +277,7 @@ namespace state_machine
         {
             command_pub_.publish(mission_msg);
             ros::spinOnce();
-            LOOP_RATE.sleep();
+            loopRate.sleep();
         }
     }
 
@@ -259,6 +285,9 @@ namespace state_machine
     {
         if (verbose)
             echo("Ascend mode in OFFBOARD_MODE");
+
+        ros::Rate loopRate(10);
+
         geometry_msgs::PoseStamped mission_msg;
         mission_msg.pose.position.z = mav_pose_.pose.position.z + HOVER_HEIGHT;
 
@@ -266,7 +295,7 @@ namespace state_machine
         {
             command_pub_.publish(mission_msg);
             ros::spinOnce();
-            LOOP_RATE.sleep();
+            loopRate.sleep();
         }
         return;
     }
@@ -278,11 +307,14 @@ namespace state_machine
         dz_pose_.pose.position.z = HOVER_HEIGHT;
         if (verbose)
             echo("Going to DropZone");
+
+        ros::Rate loopRate(10);
+
         for (int i = 0; i < 10; i++)
         {
             ros::spinOnce();
             command_pub_.publish(dz_pose_);
-            LOOP_RATE.sleep();
+            loopRate.sleep();
         }
 
         // try to detect DropZone AR tag
@@ -312,7 +344,7 @@ namespace state_machine
             mission_msg.pose.position.y = mav_pose_.pose.position.y - ADVANCING_FACTOR_HORZ * tag_pose_.pose.point.y;
             mission_msg.pose.position.z = HOVER_HEIGHT;
             command_pub_.publish(mission_msg);
-            LOOP_RATE.sleep();
+            loopRate.sleep();
         }
 
         return;
@@ -323,6 +355,8 @@ namespace state_machine
         if (verbose)
             echo("Going to LZ");
 
+        ros::Rate loopRate(10);
+
         geometry_msgs::PointStamped mission_msg;
 
         mav_pose_.pose.position.z = -DBL_MAX;
@@ -331,7 +365,7 @@ namespace state_machine
         while (mav_pose_.pose.position.z == -DBL_MAX)
         {
             ros::spinOnce();
-            LOOP_RATE.sleep();
+            loopRate.sleep();
         }
         if (verbose)
             echo("Received MAV position");
@@ -353,7 +387,7 @@ namespace state_machine
                 ALIGNED = true;
                 return;
             }
-            LOOP_RATE.sleep();
+            loopRate.sleep();
         }
         return;
     }
@@ -386,7 +420,7 @@ namespace state_machine
                     echo("HOLD enabled");
                 mode_set_ = true;
             }
-            LOOP_RATE.sleep();
+            loopRate.sleep();
         }
         if (verbose)
             echo("Changed mode to LOITER");
@@ -403,6 +437,8 @@ namespace state_machine
         if (verbose)
             echo("Landing now");
 
+        ros::Rate loopRate(10);
+
         mavros_msgs::SetMode land_set_mode;
         bool mode_set_ = false;
         land_set_mode.request.custom_mode = "AUTO.LAND";
@@ -417,7 +453,7 @@ namespace state_machine
                     echo("LAND enabled");
                 mode_set_ = true;
             }
-            LOOP_RATE.sleep();
+            loopRate.sleep();
         }
         if (verbose)
             echo("Changed mode to LAND");
@@ -486,5 +522,10 @@ namespace state_machine
     {
         CONTINUE_MISSION = false;
         return false;
+    }
+
+    double point_distance(geometry_msgs::PoseStamped p1, geometry_msgs::PointStamped p2)
+    {
+        return sqrt(pow(p1.pose.position.x - p2.point.x, 2) + pow(p1.pose.position.y - p2.point.y, 2) + pow(p1.pose.position.z - p2.point.z, 2));
     }
 }
