@@ -47,6 +47,9 @@ int main(int argc, char **argv)
             loopRate.sleep();
         }
 
+        if (!machine.CONTINUE_MISSION)
+            break;
+
         transitRate.sleep();
         // ? WHAT WOULD HAPPEN IN THIS TRANSIT SLEEP STATE? WHICH MODE?
         // * this planner would enter sleep, and mav would continue on its own

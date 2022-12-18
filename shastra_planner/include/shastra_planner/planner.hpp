@@ -53,7 +53,7 @@ namespace state_machine
 
     struct fsm : public msm::front::state_machine_def<fsm>
     {
-        fsm() {}
+        fsm() {} // default constructability
 
         /*
         callbacks
@@ -79,7 +79,7 @@ namespace state_machine
 
             TRANSITION_TIME = 1.0;
 
-            mission_info = "mission_info", emag_control = "emag/control", odometry = "odometry", state = "state", utm_pose = "utm_pose", set_mode = "set_mode", mission_waypoint_pull = "mission/wpPull", pose_estimator = "pose_estimator/aruco_pose", lidar_distance = "lidar/distance/distance_raw", land = "mavros/cmd/land", mission_reached = "mission/reached";
+            mission_info = "mission_info", emag_control = "emag_switch", odometry = "odometry", state = "state", utm_pose = "utm_pose", set_mode = "set_mode", mission_waypoint_pull = "mission/wpPull", pose_estimator = "pose_estimator/aruco_pose", land = "mavros/cmd/land", mission_reached = "mission/reached";
 
             emag_pub_ = nh_->advertise<std_msgs::UInt8>(emag_control, 5);
             command_pub_ = nh_->advertise<geometry_msgs::PoseStamped>(mission_info, 10);

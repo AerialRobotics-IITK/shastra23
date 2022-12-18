@@ -17,6 +17,9 @@ namespace state_machine
     }
     void fsm::wp_reached_cb_(const mavros_msgs::WaypointReached &msg) { prev_wp = msg; }
 
+    /*
+        Helper functions
+    */
     void statePublish(ros::NodeHandle nh, fsm_ *fsm)
     {
         ros::Publisher statePub = nh.advertise<std_msgs::String>("curr_state", 10);
@@ -164,7 +167,7 @@ namespace state_machine
                 i -= 1; // decrement counter if no detection
 
             // exit mission, box not found throughout
-            if (prev_wp.wp_seq == num_wp) // !PROBLEM
+            if (prev_wp.wp_seq == num_wp)
             {
                 if (verbose)
                     echo("Reached last waypoint, going home");
@@ -189,6 +192,7 @@ namespace state_machine
                         {
                             echo("OFFBOARD_MODE enabled");
                             echo("Going to Landing Zone");
+                            CONTINUE_MISSION = false;
                             return;
                         }
 
