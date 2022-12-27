@@ -51,4 +51,5 @@ include_directories(
     include
     ${catkin_INCLUDE_DIRS}
 )
+add_dependencies(aruco_detector_node aruco_detector_generate_messages_cpp)
 target_link_libraries(aruco_detector_node ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OpenCV_LIBS})
