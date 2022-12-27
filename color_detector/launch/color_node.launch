@@ -1,0 +1,8 @@
+<!-- Launch aruco_detector_node -->
+<!-- ... -->
+<launch>
+
+  <node pkg="color_detector" type="color_detector_node" name="color_detector_node" output="screen">
+
+  </node>
+</launch>

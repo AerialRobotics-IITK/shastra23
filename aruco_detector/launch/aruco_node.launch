@@ -1,0 +1,13 @@
+<!-- Launch aruco_detector_node -->
+<!-- ... -->
+<launch>
+  <include file = "$(find ocam)/launch/ocam_ros.launch"/>
+    <node pkg="color_detector" type="color_detector_node" name="color_detector_node" output="screen"/>
+
+    <node pkg="aruco_detector" type="aruco_detector_node" name="aruco_detector_node" >
+  </node>
+  <node pkg = "pose_estimator" type = "pose_estimator_node" name = "pose_estimator_node" output = "screen">
+  </node>
+  <!-- <include file = "$(find mavros)/launch/px4.launch"/> -->
+
+</launch>

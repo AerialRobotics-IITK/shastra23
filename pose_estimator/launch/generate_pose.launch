@@ -1,0 +1,3 @@
+<launch>
+    <node name="aruco_pose" type="pose_estimator_node" pkg="pose_estimator" output="screen"/>
+</launch>
