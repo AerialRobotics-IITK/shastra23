@@ -71,7 +71,7 @@ namespace state_machine
             ALIGNED = false;
 
             PICKUP_HOVER_HEIGHT = 0.4, PICKUP_X_DEFLECTION = 0.27, HOVER_HEIGHT = 1.5;
-            HOVER_TIME = 5.0, DZ_Y_OFFSET_FROM_LZ = 4.0;
+            HOVER_TIME = 10.0, DZ_Y_OFFSET_FROM_LZ = 4.0;
             DELAY_TIME = 0.5, DISTANCE_THRESHOLD = 0.1;
             ADVANCING_FACTOR_Z = 0.05, ADVANCING_FACTOR_HORZ = 0.5;
 
