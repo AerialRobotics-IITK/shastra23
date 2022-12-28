@@ -4,11 +4,11 @@
   <arg name="resolution" default="2"/>
   <!-- 0: 1280x960, 1: 1280x720, 2: 640x480, 3: 640x360 -->
   <arg name="frame_rate" default="60"/>
-  <arg name="exposure" default="100"/>
+  <arg name="exposure" default="240"/>
   <arg name="gain" default="250"/>
   <arg name="wb_blue" default="250"/>
   <arg name="wb_red" default="142"/>
-  <arg name="auto_exposure" default="false"/>
+  <arg name="auto_exposure" default="true"/>
   <arg name="show_image" default="false"/>
   <arg name="camera_name" default="camera"/>
   <arg name="device_info" default="package://ocam/config/camera.yaml"/>

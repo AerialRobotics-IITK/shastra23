@@ -16,6 +16,7 @@ using std::string;
 
 #include <shastra_msgs/UTMPose.h>
 #include <shastra_msgs/TagPose.h>
+#include <sensor_msgs/NavSatFix.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PointStamped.h>
 #include <mavros_msgs/State.h>

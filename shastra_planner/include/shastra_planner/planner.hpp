@@ -62,6 +62,7 @@ namespace state_machine
         void state_cb_(const mavros_msgs::State &msg);
         void pose_estimator_cb_(const shastra_msgs::TagPose &msg);
         void wp_reached_cb_(const mavros_msgs::WaypointReached &msg);
+        void global_position_cb_(const sensor_msgs::NavSatFix &msg);
 
         fsm(ros::NodeHandle *nh)
         {
@@ -88,6 +89,7 @@ namespace state_machine
             loc_pose_sub_ = nh_->subscribe(pose_estimator, 1, &state_machine::fsm::pose_estimator_cb_, this);
             state_sub_ = nh_->subscribe(state, 1, &state_machine::fsm::state_cb_, this);
             mission_wp_sub = nh_->subscribe(mission_reached, 10, &state_machine::fsm::wp_reached_cb_, this);
+            // global_pose_sub_ = nh_.subscribe(utm_pose, 1, global_pose_sub_);
 
             set_mode_client = nh_->serviceClient<mavros_msgs::SetMode>(set_mode);
             mission_client = nh_->serviceClient<mavros_msgs::WaypointPull>(mission_waypoint_pull);
@@ -113,6 +115,7 @@ namespace state_machine
 
         bool ALIGNED;
 
+        // sensor_msgs::NavSatFix home_pose_;
         geometry_msgs::PoseStamped mav_pose_, lz_pose_, dz_pose_;
         shastra_msgs::TagPose tag_pose_;
         mavros_msgs::State mav_mode_;
@@ -135,7 +138,7 @@ namespace state_machine
         ros::Subscriber loc_pose_sub_;
         // ros::Subscriber lidar_dist_sub_ = nh_.subscribe(lidar_distance, 5, lidar_dist_cb_);
         ros::Subscriber state_sub_;
-        // ros::Subscriber utm_pose_sub_ = nh_.subscribe(utm_pose, 1, utm_pose_cb_);
+        // ros::Subscriber global_pose_sub_;
         ros::Subscriber mission_wp_sub;
 
         /*

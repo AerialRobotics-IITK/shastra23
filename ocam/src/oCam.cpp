@@ -15,7 +15,7 @@
 
 class Camera
 {
-    Withrobot::Camera* camera;
+    Withrobot::Camera *camera;
     Withrobot::camera_format camFormat;
 
 private:
@@ -24,19 +24,35 @@ private:
     std::string devPath_;
 
 public:
+    Camera(std::string device_id, int resolution, double frame_rate) : camera(NULL)
+    {
 
-    Camera(std::string device_id, int resolution, double frame_rate): camera(NULL) {
-
-        //enum_dev_list();
+        // enum_dev_list();
         devPath_ = device_id;
         camera = new Withrobot::Camera(devPath_.c_str());
 
-        if (resolution == 0) { width_ = 1280; height_ = 960;}
-        if (resolution == 1) { width_ = 1280; height_ = 720;}
-        if (resolution == 2) { width_ = 640; height_  = 480;}
-        if (resolution == 3) { width_ = 320; height_  = 240;}
+        if (resolution == 0)
+        {
+            width_ = 1280;
+            height_ = 960;
+        }
+        if (resolution == 1)
+        {
+            width_ = 1280;
+            height_ = 720;
+        }
+        if (resolution == 2)
+        {
+            width_ = 640;
+            height_ = 480;
+        }
+        if (resolution == 3)
+        {
+            width_ = 320;
+            height_ = 240;
+        }
 
-        camera->set_format(width_, height_, Withrobot::fourcc_to_pixformat('G','R','B','G'), 1, (unsigned int)frame_rate);
+        camera->set_format(width_, height_, Withrobot::fourcc_to_pixformat('G', 'R', 'B', 'G'), 1, (unsigned int)frame_rate);
 
         /*
          * get current camera format (image size and frame rate)
@@ -47,13 +63,13 @@ public:
 
         /* Withrobot camera start */
         camera->start();
-	}
+    }
 
-    ~Camera() {
+    ~Camera()
+    {
         camera->stop();
         delete camera;
-
-	}
+    }
 
     void enum_dev_list()
     {
@@ -61,13 +77,15 @@ public:
         std::vector<Withrobot::usb_device_info> dev_list;
         int dev_num = Withrobot::get_usb_device_info_list(dev_list);
 
-        if (dev_num < 1) {
+        if (dev_num < 1)
+        {
             dev_list.clear();
 
             return;
         }
 
-        for (unsigned int i=0; i < dev_list.size(); i++) {
+        for (unsigned int i = 0; i < dev_list.size(); i++)
+        {
             if (dev_list[i].product == "oCam-1CGN-U")
             {
                 devPath_ = dev_list[i].dev_node;
@@ -87,10 +105,10 @@ public:
         /* White Balance Setting */
         camera->set_control("White Balance Blue Component", blue);
         camera->set_control("White Balance Red Component", red);
-
     }
 
-    bool getImages(cv::Mat &image) {
+    bool getImages(cv::Mat &image)
+    {
 
         cv::Mat srcImg(cv::Size(camFormat.width, camFormat.height), CV_8UC1);
         cv::Mat dstImg;
@@ -101,16 +119,19 @@ public:
             image = dstImg;
 
             return true;
-        } else {
+        }
+        else
+        {
             return false;
         }
-	}
+    }
 };
 
 /**
  * @brief       the camera ros warpper class
  */
-class oCamROS {
+class oCamROS
+{
 
 private:
     int resolution_;
@@ -125,7 +146,7 @@ private:
 
     ros::NodeHandle nh;
     std::string camera_frame_id_;
-    Camera* ocam;
+    Camera *ocam;
     /**
      * @brief      { publish camera info }
      *
@@ -133,7 +154,8 @@ private:
      * @param[in]  cam_info_msg  The camera information message
      * @param[in]  now           The now
      */
-    void publishCamInfo(const ros::Publisher& pub_cam_info, sensor_msgs::CameraInfo& cam_info_msg, ros::Time now) {
+    void publishCamInfo(const ros::Publisher &pub_cam_info, sensor_msgs::CameraInfo &cam_info_msg, ros::Time now)
+    {
         cam_info_msg.header.stamp = now;
         pub_cam_info.publish(cam_info_msg);
     }
@@ -146,7 +168,8 @@ private:
      * @param[in]  img_frame_id  The image frame identifier
      * @param[in]  t             { parameter_description }
      */
-    void publishImage(cv::Mat img, image_transport::Publisher &img_pub, std::string img_frame_id, ros::Time t) {
+    void publishImage(cv::Mat img, image_transport::Publisher &img_pub, std::string img_frame_id, ros::Time t)
+    {
         cv_bridge::CvImage cv_image;
         // cv::Mat und_img, camMat(3,3,CV_32FC1, &(cinfo.K));
         // cv::undistort(img, und_img, camMat, cinfo.D);
@@ -158,23 +181,23 @@ private:
         img_pub.publish(cv_image.toImageMsg());
     }
 
-    void device_poll() {
-        //Reconfigure confidence
+    void device_poll()
+    {
+        // Reconfigure confidence
         dynamic_reconfigure::Server<ocam::camConfig> server;
         dynamic_reconfigure::Server<ocam::camConfig>::CallbackType f;
-        f = boost::bind(&oCamROS::callback, this ,_1, _2);
+        f = boost::bind(&oCamROS::callback, this, _1, _2);
         server.setCallback(f);
 
         // setup publisher stuff
         image_transport::ImageTransport it(nh);
-        image_transport::Publisher camera_image_pub = it.advertise( camera_name_ + "/image_raw", 1);
+        image_transport::Publisher camera_image_pub = it.advertise(camera_name_ + "/image_raw", 1);
 
         ros::Publisher camera_info_pub = nh.advertise<sensor_msgs::CameraInfo>(camera_name_ + "/camera_info", 1);
 
         sensor_msgs::CameraInfo camera_info;
 
         ROS_INFO("Loading from ROS calibration files");
-
 
         // get config from the left, right.yaml in config
         camera_info_manager::CameraInfoManager info_manager(nh);
@@ -189,53 +212,60 @@ private:
 
         // loop to publish images;
         cv::Mat camera_image, undist_image;
-        cv::Mat intrinsic = cv::Mat_<double>(3,3);
-        cv::Mat distCoeffs = cv::Mat_<double>(1,5);
+        cv::Mat intrinsic = cv::Mat_<double>(3, 3);
+        cv::Mat distCoeffs = cv::Mat_<double>(1, 5);
 
-        for(int i=0; i<5; i++)
+        for (int i = 0; i < 5; i++)
         {
             distCoeffs.at<double>(i) = camera_info.D[i];
         }
 
         int tempID = 0;
-        for(int i=0; i<3; i++)
+        for (int i = 0; i < 3; i++)
         {
-            for(int j=0; j<3; j++)
+            for (int j = 0; j < 3; j++)
             {
-                intrinsic.at<double>(i,j) = camera_info.K[tempID++];
+                intrinsic.at<double>(i, j) = camera_info.K[tempID++];
             }
         }
 
-    
         ros::Rate r(frame_rate_);
 
         while (ros::ok())
         {
             ros::Time now = ros::Time::now();
 
-            if (!ocam->getImages(camera_image)) {
+            if (!ocam->getImages(camera_image))
+            {
                 usleep(1000);
                 continue;
-            } else {
+            }
+            else
+            {
                 ROS_INFO_ONCE("Success, found camera");
             }
 
-            if (camera_image_pub.getNumSubscribers() > 0) {
-                if (do_undistort_) {
-                  cv::undistort(camera_image, undist_image, intrinsic, distCoeffs);
-                } else {
-                  undist_image = camera_image;
+            if (camera_image_pub.getNumSubscribers() > 0)
+            {
+                if (do_undistort_)
+                {
+                    cv::undistort(camera_image, undist_image, intrinsic, distCoeffs);
+                }
+                else
+                {
+                    undist_image = camera_image;
                 }
 
                 publishImage(undist_image, camera_image_pub, "camera_frame", now);
             }
 
-            if (camera_info_pub.getNumSubscribers() > 0) {
+            if (camera_info_pub.getNumSubscribers() > 0)
+            {
                 publishCamInfo(camera_info_pub, camera_info, now);
             }
 
-
-            if (show_image_) {
+            if (show_image_)
+            {
                 cv::imshow("image", camera_image);
                 cv::waitKey(10);
             }
@@ -244,19 +274,21 @@ private:
         }
     }
 
-    void callback(ocam::camConfig &config, uint32_t level) {
+    void callback(ocam::camConfig &config, uint32_t level)
+    {
         ocam->uvc_control(config.exposure, config.gain, config.wb_blue, config.wb_red);
         do_undistort_ = config.undistort;
     }
 
-  public:
+public:
     /**
-	 * @brief      { function_description }
-	 *
-	 * @param[in]  resolution  The resolution
-	 * @param[in]  frame_rate  The frame rate
+     * @brief      { function_description }
+     *
+     * @param[in]  resolution  The resolution
+     * @param[in]  frame_rate  The frame rate
      */
-    oCamROS() {
+    oCamROS()
+    {
         ros::NodeHandle priv_nh("~");
 
         /* default parameters */
@@ -272,7 +304,6 @@ private:
         do_undistort_ = true;
         camera_name_ = "ocam";
         device_info_ = "package://ocam/config/camera.yaml";
-
 
         /* get parameters */
         priv_nh.getParam("device_id", device_id_);
@@ -296,14 +327,15 @@ private:
         // thread
         boost::shared_ptr<boost::thread> device_poll_thread;
         device_poll_thread = boost::shared_ptr<boost::thread>(new boost::thread(&oCamROS::device_poll, this));
-	}
+    }
 
-    ~oCamROS() {
+    ~oCamROS()
+    {
         delete ocam;
     }
 };
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
     ros::init(argc, argv, "ocam");
 
@@ -316,4 +348,3 @@ int main (int argc, char **argv)
 
     return 0;
 }
-

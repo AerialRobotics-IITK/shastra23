@@ -5,13 +5,15 @@
 #include <opencv2/opencv.hpp>
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
-int main(int argc, char** argv) {
+int main(int argc, char **argv)
+{
     ros::init(argc, argv, "color_detector_node");
     ros::NodeHandle nh;
     ros::Rate loop_rate(30);
     // image_transport::Subscriber cam_sub = it.subscribe("/camera/image_raw", 1, imageCallback);
     color::ColorDetector color_detector(nh, "/camera/image_raw", "/color_detector/color_detected");
-    while (ros::ok()) {
+    while (ros::ok())
+    {
         ros::spinOnce();
         loop_rate.sleep();
     }

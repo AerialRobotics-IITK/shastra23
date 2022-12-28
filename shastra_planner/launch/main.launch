@@ -8,8 +8,11 @@
 
     <node name="shastra_planner" pkg="shastra_planner" type="planner" output="screen">
         <remap from="odometry" to="mavros/local_position/pose"/>
+        <remap from="mission_info" to="mavros/setpoint_position/local" />
         <remap from="state" to="mavros/state"/>
         <remap from="mission/wpPull" to="mavros/mission/waypoints"/>
+        <remap from="pose_estimator/aruco_pose" to="pose_estimator/aruco_pose" />
+        <remap from="mission/reached" to="mavros/mission/reached" />
         <remap from="set_mode" to="mavros/set_mode"/>
 
     </node>
