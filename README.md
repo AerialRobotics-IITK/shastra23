@@ -24,6 +24,7 @@ mkdir -p shastra_ws/src && cd shastra_ws/
 catkin init
 cd src/
 git clone git@github.com:AerialRobotics-IITK/shastra23.git .
+git checkout simulation
 git submodule init
 git submodule update
 ```
